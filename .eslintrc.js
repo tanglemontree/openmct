@@ -11,6 +11,7 @@ module.exports = {
     },
     "extends": [
         "eslint:recommended",
+        "plugin:sonarjs/recommended",
         "plugin:vue/recommended",
         "plugin:you-dont-need-lodash-underscore/compatible"
     ],
@@ -35,7 +36,6 @@ module.exports = {
         "no-inner-declarations": "off",
         "no-use-before-define": ["error", "nofunc"],
         "no-caller": "error",
-        "no-sequences": "error",
         "no-irregular-whitespace": "error",
         "no-new": "error",
         "no-shadow": "error",
