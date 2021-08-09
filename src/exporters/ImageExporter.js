@@ -46,22 +46,25 @@ class ImageExporter {
         * @param {object} options Image options.
         * @returns {promise}
         */
-    renderElement(element, { imageType, className, thumbnailSize }) {
+    renderElement(element, { imageType, className, thumbnailSize }, hideCapturingDialog) {
         const self = this;
         const overlays = this.openmct.overlays;
-        const dialog = overlays.dialog({
-            iconClass: 'info',
-            message: 'Caputuring an image',
-            buttons: [
-                {
-                    label: 'Cancel',
-                    emphasis: true,
-                    callback: function () {
-                        dialog.dismiss();
+        let dialog = null;
+        if (!hideCapturingDialog) {
+            dialog = overlays.dialog({
+                iconClass: 'info',
+                message: 'Caputuring an image',
+                buttons: [
+                    {
+                        label: 'Cancel',
+                        emphasis: true,
+                        callback: function () {
+                            dialog.dismiss();
+                        }
                     }
-                }
-            ]
-        });
+                ]
+            });
+        }
 
         let mimeType = 'image/png';
         if (imageType === 'jpg') {
@@ -78,17 +81,23 @@ class ImageExporter {
         }
 
         return html2canvas(element, {
+            logging: false,
             onclone: function (document) {
                 if (className) {
                     const clonedElement = document.getElementById(exportId);
                     clonedElement.classList.add(className);
                 }
 
-                element.id = oldId;
+                if (oldId) {
+                    element.id = oldId;
+                }
             },
             removeContainer: true // Set to false to debug what html2canvas renders
         }).then(function (canvas) {
-            dialog.dismiss();
+
+            if (!hideCapturingDialog) {
+                dialog.dismiss();
+            }
 
             return new Promise(function (resolve, reject) {
                 if (thumbnailSize) {
@@ -104,7 +113,10 @@ class ImageExporter {
             });
         }, function (error) {
             console.log('error capturing image', error);
-            dialog.dismiss();
+            if (!hideCapturingDialog) {
+                dialog.dismiss();
+            }
+
             const errorDialog = overlays.dialog({
                 iconClass: 'error',
                 message: 'Image was not captured successfully!',
@@ -139,13 +151,13 @@ class ImageExporter {
      * @param {string} className to be added to element before capturing (optional)
      * @returns {promise}
      */
-    async exportJPG(element, filename, className) {
+    async exportJPG(element, filename, className, hideCapturingDialog) {
         const processedFilename = replaceDotsWithUnderscores(filename);
 
         const img = await this.renderElement(element, {
             imageType: 'jpg',
             className
-        });
+        }, hideCapturingDialog);
         saveAs(img.blob, processedFilename);
     }
 
@@ -156,13 +168,13 @@ class ImageExporter {
      * @param {string} className to be added to element before capturing (optional)
      * @returns {promise}
      */
-    async exportPNG(element, filename, className) {
+    async exportPNG(element, filename, className, hideCapturingDialog) {
         const processedFilename = replaceDotsWithUnderscores(filename);
 
         const img = await this.renderElement(element, {
             imageType: 'png',
             className
-        });
+        }, hideCapturingDialog);
         saveAs(img.blob, processedFilename);
     }
 

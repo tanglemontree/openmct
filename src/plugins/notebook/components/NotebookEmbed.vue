@@ -235,9 +235,9 @@ export default {
             let element = this.snapshot.$refs['snapshot-image'];
 
             if (type === 'png') {
-                this.imageExporter.exportPNG(element, this.embed.name);
+                this.imageExporter.exportPNG(element, this.embed.name, null, true);
             } else {
-                this.imageExporter.exportJPG(element, this.embed.name);
+                this.imageExporter.exportJPG(element, this.embed.name, null, true);
             }
         },
         previewEmbed() {
